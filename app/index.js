@@ -7,19 +7,15 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Головний екран</Text>
-      <Text style={styles.subtitle}>Тут потім буде щось круте!</Text>
+      <Text style={styles.title}>Ласкаво просимо до IQ Pizza!</Text>
+      <Text style={styles.subtitle}>Найсмачніша піца у твоєму телефоні 🍕</Text>
+
       <TouchableOpacity 
-        style={styles.btn} 
+        style={styles.btn}
         onPress={() => router.push('/menu')}
       >
-        <Text style={styles.btnText}>Перейти до меню 🍕</Text>
+        <Text style={styles.btnText}>Перейти до меню</Text>
       </TouchableOpacity>
     </View>
   );
 }
-
-
-
-
-      
