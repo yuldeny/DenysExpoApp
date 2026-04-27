@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  SafeAreaView,
   ScrollView,
   StatusBar,
   Text,
@@ -12,17 +11,19 @@ import {
 } from "react-native";
 import { useQuery } from '@tanstack/react-query'; 
 
-import { pizzaData } from "../data/pizzaData";
+import { Pizza } from "../data/pizzaData";
 import { CardItem } from "../src/components/CardItem";
 import { AppStyles as styles } from '../src/styles/AppStyles';
 import { Ionicons } from '@expo/vector-icons';
 
-const fetchPizzas = async () => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(pizzaData); 
-    }, 1500);
-  });
+const fetchPizzas = async (): Promise<Pizza[]> => {
+  
+  const response = await fetch('http://10.0.2.2:8000/pizzas'); 
+  if (!response.ok) {
+    throw new Error('Не вдалося завантажити меню з сервера');
+  }
+  const data = await response.json();
+  return data;
 };
 
 export default function MenuScreen() {
@@ -34,7 +35,7 @@ export default function MenuScreen() {
     isError, 
     error,
     refetch
-  } = useQuery({
+  } = useQuery<Pizza[], Error>({
     queryKey: ['pizzaMenu'],
     queryFn: fetchPizzas,
   });
@@ -55,7 +56,7 @@ export default function MenuScreen() {
         <Text style={{ fontSize: 18, textAlign: 'center', marginVertical: 15 }}>
           Ой! Щось пішло не так: {error.message}
         </Text>
-        <Button title="Спробувати ще раз" onPress={refetch} color="orange" />
+        <Button title="Спробувати ще раз" onPress={() => refetch()} color="orange" />
       </View>
     );
   }
@@ -65,7 +66,7 @@ export default function MenuScreen() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, paddingTop: 30 }}>
+    <View style={{ flex: 1, paddingTop: 30 }}>
       <StatusBar backgroundColor="#FFF" barStyle={"dark-content"} />
       <View style={styles.container}>
         <Text style={styles.text}>IQ pizza</Text>
@@ -112,6 +113,6 @@ export default function MenuScreen() {
       <TouchableOpacity style={styles.orderBtn}>
         <Text style={styles.orderBtnText}>Зробити замовлення</Text>
       </TouchableOpacity>
-    </SafeAreaView>
+    </View>
   );
 }
