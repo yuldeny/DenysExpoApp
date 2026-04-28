@@ -9,16 +9,16 @@ import {
   ActivityIndicator,
   Button
 } from "react-native";
-import { useQuery } from '@tanstack/react-query'; 
+import { useQuery } from '@tanstack/react-query';
 
 import { Pizza } from "../data/pizzaData";
 import { CardItem } from "../src/components/CardItem";
 import { AppStyles as styles } from '../src/styles/AppStyles';
 import { Ionicons } from '@expo/vector-icons';
+import { PIZZAS_URL } from "../src/api";
 
 const fetchPizzas = async (): Promise<Pizza[]> => {
-  
-  const response = await fetch('http://10.0.2.2:8000/pizzas'); 
+  const response = await fetch(PIZZAS_URL);
   if (!response.ok) {
     throw new Error('Не вдалося завантажити меню з сервера');
   }
@@ -29,10 +29,10 @@ const fetchPizzas = async (): Promise<Pizza[]> => {
 export default function MenuScreen() {
   const [search, setSearch] = useState("");
 
-  const { 
+  const {
     data: pizzas = [],
-    isLoading, 
-    isError, 
+    isLoading,
+    isError,
     error,
     refetch
   } = useQuery<Pizza[], Error>({

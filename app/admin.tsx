@@ -1,22 +1,22 @@
 import { View, Text, Button, Alert, ScrollView, TouchableOpacity } from 'react-native';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { adminStyles as styles } from '../src/styles/AdminStyles';
+import { PIZZAS_URL } from '../src/api';
 
 export default function AdminScreen() {
   const queryClient = useQueryClient();
-  const API_URL = 'http://192.168.0.100:8000/pizzas';
 
   const { data: pizzas = [] } = useQuery({
     queryKey: ['pizzaMenu'],
     queryFn: async () => {
-      const response = await fetch(API_URL);
+      const response = await fetch(PIZZAS_URL);
       return response.json();
     }
   });
 
   const addPizzaMutation = useMutation({
     mutationFn: async (newPizza: any) => {
-      const response = await fetch(API_URL, {
+      const response = await fetch(PIZZAS_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newPizza),
@@ -32,7 +32,7 @@ export default function AdminScreen() {
 
   const deletePizzaMutation = useMutation({
     mutationFn: async (pizzaId: number) => {
-      const response = await fetch(`${API_URL}/${pizzaId}`, {
+      const response = await fetch(`${PIZZAS_URL}/${pizzaId}`, {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error('Помилка');
@@ -45,7 +45,7 @@ export default function AdminScreen() {
 
   const updatePizzaMutation = useMutation({
     mutationFn: async (updatedPizza: any) => {
-      const response = await fetch(`${API_URL}/${updatedPizza.id}`, {
+      const response = await fetch(`${PIZZAS_URL}/${updatedPizza.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedPizza),
@@ -82,7 +82,7 @@ export default function AdminScreen() {
   const handleDiscount = (pizza: any) => {
     const changedPizza = {
       ...pizza,
-      price: Math.max(0, pizza.price - 10), 
+      price: Math.max(0, pizza.price - 10),
       name: pizza.name.includes("(Знижка)") ? pizza.name : pizza.name + " (Знижка)"
     };
     updatePizzaMutation.mutate(changedPizza);
@@ -91,11 +91,11 @@ export default function AdminScreen() {
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <Text style={styles.pageTitle}>Панель Адміністратора</Text>
-      
-      <Button 
-        title="Додати тестову піцу" 
-        onPress={handleAddTestPizza} 
-        color="orange" 
+
+      <Button
+        title="Додати тестову піцу"
+        onPress={handleAddTestPizza}
+        color="orange"
       />
 
       <Text style={styles.sectionTitle}>Список товарів:</Text>
@@ -107,23 +107,23 @@ export default function AdminScreen() {
               {pizza.name} - {pizza.price} грн
             </Text>
           </View>
-          
+
           <View style={styles.buttonsContainer}>
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => handleDiscount(pizza)}
               style={styles.btnDiscount}
             >
               <Text style={styles.btnTextWhite}>-10 грн</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => handleQuickUpdate(pizza)}
               style={styles.btnUpdate}
             >
               <Text style={styles.btnTextBlack}>+10 грн</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => deletePizzaMutation.mutate(pizza.id)}
               style={styles.btnDelete}
             >
