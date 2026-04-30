@@ -1,39 +1,44 @@
-import React from 'react';
-import { Image, Text, TouchableOpacity, View, Alert } from "react-native";
+import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { CardStyles as styles } from '../styles/CardStyles';
-import { Ionicons } from '@expo/vector-icons';
 
-export interface CardItemProps {
+interface CardItemProps {
   text: string;
   img: string;
   price: number;
   weight: string;
   description: string;
+  onAddToCart: () => void;
 }
 
-export const CardItem = ({ text, img, price, weight, description }: CardItemProps) => {
+export const CardItem = ({ text, img, price, weight, description, onAddToCart }: CardItemProps) => {
   return (
     <View style={styles.card}>
-      <Image style={styles.image} source={{ uri: img }} />
+      <Image source={{ uri: img }} style={styles.image} />
+      
       <View style={styles.info}>
         <View style={styles.row}>
-          <Text style={styles.name}>{text}</Text>
+          <Text style={styles.name} numberOfLines={1}>{text}</Text>
           <TouchableOpacity style={styles.heartBtn}>
-            <Text style={styles.heartText}><Ionicons name="heart-outline" size={18} color="orange" /></Text>
+            <Text style={styles.heartText}>♡</Text>
           </TouchableOpacity>
         </View>
-        <Text style={styles.description}>{description}</Text>
+
+        <Text style={styles.description} numberOfLines={2}>
+          {description}
+        </Text>
+
         <View style={styles.weight}>
           <Text style={styles.weightText}>{weight}</Text>
         </View>
+
         <View style={styles.row}>
           <Text style={styles.price}>{price} ₴</Text>
-          <TouchableOpacity style={styles.plusBtn} onPress={() => Alert.alert("Піцу додано в кошик", text)}>
-            <Text style={styles.plusText}><Ionicons name="add" size={18} color="orange" /></Text>
+          
+          <TouchableOpacity style={styles.plusBtn} onPress={onAddToCart}>
+            <Text style={styles.plusText}>+</Text>
           </TouchableOpacity>
         </View>
       </View>
     </View>
   );
 };
-
