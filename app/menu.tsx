@@ -7,27 +7,32 @@ import {
   TouchableOpacity,
   View,
   ActivityIndicator,
-  Button
+  Button,
+  SafeAreaView
 } from "react-native";
 import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 import { Pizza } from "../data/pizzaData";
 import { CardItem } from "../src/components/CardItem";
 import { AppStyles as styles } from '../src/styles/AppStyles';
-import { Ionicons } from '@expo/vector-icons';
 import { PIZZAS_URL } from "../src/api";
+import { useCart } from "../src/context/CartContext";
 
 const fetchPizzas = async (): Promise<Pizza[]> => {
   const response = await fetch(PIZZAS_URL);
   if (!response.ok) {
     throw new Error('Не вдалося завантажити меню з сервера');
   }
-  const data = await response.json();
-  return data;
+  return await response.json();
 };
 
 export default function MenuScreen() {
+  const router = useRouter();
   const [search, setSearch] = useState("");
+  
+  const { cart, addToCart, totalSum } = useCart();
 
   const {
     data: pizzas = [],
@@ -54,7 +59,7 @@ export default function MenuScreen() {
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', padding: 20 }]}>
         <Ionicons name="warning-outline" size={50} color="red" />
         <Text style={{ fontSize: 18, textAlign: 'center', marginVertical: 15 }}>
-          Ой! Щось пішло не так: {error.message}
+          Помилка: {error.message}
         </Text>
         <Button title="Спробувати ще раз" onPress={() => refetch()} color="orange" />
       </View>
@@ -62,38 +67,29 @@ export default function MenuScreen() {
   }
 
   const filteredPizza = pizzas.filter((pizza) =>
-    pizza.name.toLowerCase().includes(search.toLowerCase()),
+    pizza.name.toLocaleLowerCase().includes(search.toLocaleLowerCase()),
   );
 
   return (
-    <View style={{ flex: 1, paddingTop: 30 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
       <StatusBar backgroundColor="#FFF" barStyle={"dark-content"} />
       <View style={styles.container}>
         <Text style={styles.text}>IQ pizza</Text>
 
         <View style={styles.inputContainer}>
-          <Text style={{ fontSize: 16 }}><Ionicons name="search" size={18} color="black" /></Text>
+          <Ionicons name="search" size={18} color="black" style={{ marginRight: 10 }} />
           <TextInput
-            style={styles.input}
-            onChangeText={(value) => setSearch(value)}
-            value={search}
-            placeholder="Пошук піци..."
+                style={styles.input}
+                onChangeText={(value) => setSearch(value)}
+                value={search}
+                placeholder="Пошук..."
+                placeholderTextColor="rgba(0, 0, 0, 0.4)" 
           />
         </View>
 
-        {search.length > 0 && (
-          <View style={styles.searchResults}>
-            {filteredPizza.map((pizza) => (
-              <Text key={pizza.id} style={styles.searchItem}>
-                {pizza.name}
-              </Text>
-            ))}
-          </View>
-        )}
-
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 80 }}
+          contentContainerStyle={{ paddingBottom: 100 }}
         >
           <View style={styles.imgContainer}>
             {filteredPizza.map((pizza) => (
@@ -104,15 +100,23 @@ export default function MenuScreen() {
                 price={pizza.price}
                 weight={pizza.weight}
                 description={pizza.description}
+                onAddToCart={() => addToCart(pizza)}
               />
             ))}
           </View>
         </ScrollView>
       </View>
 
-      <TouchableOpacity style={styles.orderBtn}>
-        <Text style={styles.orderBtnText}>Зробити замовлення</Text>
-      </TouchableOpacity>
-    </View>
+      {cart.length > 0 && (
+        <TouchableOpacity 
+          style={styles.orderBtn}
+          onPress={() => router.push('/cart' as any)}
+        >
+          <Text style={styles.orderBtnText}>
+            В корзині {cart.length} шт. на {totalSum} грн
+          </Text>
+        </TouchableOpacity>
+      )}
+    </SafeAreaView>
   );
 }
