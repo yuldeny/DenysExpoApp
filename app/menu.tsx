@@ -32,6 +32,18 @@ export default function MenuScreen() {
   const router = useRouter();
   const [search, setSearch] = useState("");
   
+  // --- НАША НОВАЯ ПАМЯТЬ ДЛЯ СЕРДЕЧЕК ---
+  const [favorites, setFavorites] = useState<number[]>([]);
+
+  // Функция, которая добавляет или удаляет ID пиццы из избранного
+  const toggleFavorite = (pizzaId: number) => {
+    setFavorites((prev) =>
+      prev.includes(pizzaId)
+        ? prev.filter((id) => id !== pizzaId)
+        : [...prev, pizzaId]
+    );
+  };
+  
   const { cart, addToCart, totalSum } = useCart();
 
   const {
@@ -66,9 +78,16 @@ export default function MenuScreen() {
     );
   }
 
-  const filteredPizza = pizzas.filter((pizza) =>
-    pizza.name.toLocaleLowerCase().includes(search.toLocaleLowerCase()),
-  );
+  // --- НОВАЯ СОРТИРОВКА (ИЗБРАННОЕ ВВЕРХ) ---
+  const filteredAndSortedPizzas = pizzas
+    .filter((pizza) => pizza.name.toLocaleLowerCase().includes(search.toLocaleLowerCase()))
+    .sort((a, b) => {
+      const isAFav = favorites.includes(a.id);
+      const isBFav = favorites.includes(b.id);
+      if (isAFav && !isBFav) return -1;
+      if (!isAFav && isBFav) return 1;
+      return 0;
+    });
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
@@ -79,11 +98,11 @@ export default function MenuScreen() {
         <View style={styles.inputContainer}>
           <Ionicons name="search" size={18} color="black" style={{ marginRight: 10 }} />
           <TextInput
-                style={styles.input}
-                onChangeText={(value) => setSearch(value)}
-                value={search}
-                placeholder="Пошук..."
-                placeholderTextColor="rgba(0, 0, 0, 0.4)" 
+            style={styles.input}
+            onChangeText={(value) => setSearch(value)}
+            value={search}
+            placeholder="Пошук..."
+            placeholderTextColor="rgba(0, 0, 0, 0.4)" 
           />
         </View>
 
@@ -92,7 +111,8 @@ export default function MenuScreen() {
           contentContainerStyle={{ paddingBottom: 100 }}
         >
           <View style={styles.imgContainer}>
-            {filteredPizza.map((pizza) => (
+            {/* Используем наш новый отсортированный массив */}
+            {filteredAndSortedPizzas.map((pizza) => (
               <CardItem
                 key={pizza.id}
                 text={pizza.name}
@@ -101,6 +121,9 @@ export default function MenuScreen() {
                 weight={pizza.weight}
                 description={pizza.description}
                 onAddToCart={() => addToCart(pizza)}
+                // --- ПЕРЕДАЕМ ДАННЫЕ В КАРТОЧКУ ---
+                isFavorite={favorites.includes(pizza.id)}
+                onToggleFavorite={() => toggleFavorite(pizza.id)}
               />
             ))}
           </View>
