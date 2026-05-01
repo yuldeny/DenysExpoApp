@@ -12,7 +12,7 @@ export default function CartScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => router.navigate('/menu')}>
           <Ionicons name="arrow-back" size={28} color="black" />
         </TouchableOpacity>
 
@@ -43,10 +43,6 @@ export default function CartScreen() {
             <Text style={styles.totalText}>Разом:</Text>
             <Text style={styles.totalAmount}>{totalSum} ₴</Text>
           </View>
-
-          <TouchableOpacity style={styles.checkoutBtn}>
-            <Text style={styles.checkoutBtnText}>Оформити замовлення</Text>
-          </TouchableOpacity>
         </View>
       )}
     </SafeAreaView>
