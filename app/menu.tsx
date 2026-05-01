@@ -8,7 +8,8 @@ import {
   View,
   ActivityIndicator,
   Button,
-  SafeAreaView
+  SafeAreaView,
+  Keyboard
 } from "react-native";
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
@@ -32,10 +33,13 @@ export default function MenuScreen() {
   const router = useRouter();
   const [search, setSearch] = useState("");
   
-  // --- НАША НОВАЯ ПАМЯТЬ ДЛЯ СЕРДЕЧЕК ---
-  const [favorites, setFavorites] = useState<number[]>([]);
+  const clearSearch = () => {
+    setSearch("");
+    Keyboard.dismiss();
+  };
 
-  // Функция, которая добавляет или удаляет ID пиццы из избранного
+  const [favorites, setFavorites] = useState<number[]>([]);
+  
   const toggleFavorite = (pizzaId: number) => {
     setFavorites((prev) =>
       prev.includes(pizzaId)
@@ -45,7 +49,6 @@ export default function MenuScreen() {
   };
   
   const { cart, addToCart, totalSum } = useCart();
-
   const {
     data: pizzas = [],
     isLoading,
@@ -78,9 +81,10 @@ export default function MenuScreen() {
     );
   }
 
-  // --- НОВАЯ СОРТИРОВКА (ИЗБРАННОЕ ВВЕРХ) ---
+  const cleanSearchQuery = search.trim().toLocaleLowerCase();
+
   const filteredAndSortedPizzas = pizzas
-    .filter((pizza) => pizza.name.toLocaleLowerCase().includes(search.toLocaleLowerCase()))
+    .filter((pizza) => pizza.name.toLocaleLowerCase().includes(cleanSearchQuery))
     .sort((a, b) => {
       const isAFav = favorites.includes(a.id);
       const isBFav = favorites.includes(b.id);
@@ -88,48 +92,83 @@ export default function MenuScreen() {
       if (!isAFav && isBFav) return 1;
       return 0;
     });
-
+ 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
       <StatusBar backgroundColor="#FFF" barStyle={"dark-content"} />
       <View style={styles.container}>
         <Text style={styles.text}>IQ pizza</Text>
-
+  
         <View style={styles.inputContainer}>
           <Ionicons name="search" size={18} color="black" style={{ marginRight: 10 }} />
           <TextInput
-            style={styles.input}
+            style={[styles.input, { paddingHorizontal: 10, flex: 1 }]} 
             onChangeText={(value) => setSearch(value)}
             value={search}
             placeholder="Пошук..."
             placeholderTextColor="rgba(0, 0, 0, 0.4)" 
           />
+          {search.length > 0 && (
+            <TouchableOpacity 
+              onPress={clearSearch}
+              style={styles.clearButton} 
+            >
+              <Ionicons 
+                name="close-circle" 
+                size={16}
+                color="orange"
+              />
+            </TouchableOpacity>
+          )}
         </View>
 
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 100 }}
         >
-          <View style={styles.imgContainer}>
-            {/* Используем наш новый отсортированный массив */}
-            {filteredAndSortedPizzas.map((pizza) => (
-              <CardItem
-                key={pizza.id}
-                text={pizza.name}
-                img={pizza.image}
-                price={pizza.price}
-                weight={pizza.weight}
-                description={pizza.description}
-                onAddToCart={() => addToCart(pizza)}
-                // --- ПЕРЕДАЕМ ДАННЫЕ В КАРТОЧКУ ---
-                isFavorite={favorites.includes(pizza.id)}
-                onToggleFavorite={() => toggleFavorite(pizza.id)}
-              />
-            ))}
-          </View>
+          {filteredAndSortedPizzas.length > 0 ? (
+            <View style={styles.imgContainer}>
+              {filteredAndSortedPizzas.map((pizza) => (
+                <TouchableOpacity 
+                  key={pizza.id}
+                  activeOpacity={0.9}
+                  onPress={() => router.push({
+                    pathname: "/pizza/[id]",
+                    params: { 
+                      id: pizza.id,
+                      name: pizza.name, 
+                      price: pizza.price, 
+                      image: pizza.image,
+                      description: pizza.description
+                    }
+                  } as any)}
+                >
+                  <CardItem
+                    text={pizza.name}
+                    img={pizza.image}
+                    price={pizza.price}
+                    weight={pizza.weight}
+                    description={pizza.description}
+                    onAddToCart={() => addToCart(pizza)}
+                    isFavorite={favorites.includes(pizza.id)}
+                    onToggleFavorite={() => toggleFavorite(pizza.id)}
+                  />
+                </TouchableOpacity>
+              ))}
+            </View>
+          ) : (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyTitle}>
+                Такої піци не існує 🍕
+              </Text>
+              <Text style={styles.emptySubtitle}>
+                Спробуйте змінити пошуковий запит
+              </Text>
+            </View>
+          )}
         </ScrollView>
       </View>
-
+  
       {cart.length > 0 && (
         <TouchableOpacity 
           style={styles.orderBtn}
