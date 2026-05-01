@@ -95,7 +95,7 @@ pizza_db = [
     },
     {
         "id": 10,
-        "name": "Мисливська справжня 30 см",
+        "name": "Мисливська тру 30 см",
         "image": "https://www.iqpizza.com.ua/_next/image?url=https%3A%2F%2Fiq-pizza.eatery.club%2Fstorage%2Fiq-pizza%2Fproduct%2Ficon%2F34878%2Fconversions%2Ftext-optimized.jpg&w=256&q=75",
         "price": 155,
         "weight": "480 г",
