@@ -1,5 +1,6 @@
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { CardStyles as styles } from '../styles/CardStyles';
+import { Ionicons } from '@expo/vector-icons';
 
 interface CardItemProps {
   text: string;
@@ -8,9 +9,20 @@ interface CardItemProps {
   weight: string;
   description: string;
   onAddToCart: () => void;
+  isFavorite: boolean; 
+  onToggleFavorite: () => void; 
 }
 
-export const CardItem = ({ text, img, price, weight, description, onAddToCart }: CardItemProps) => {
+export const CardItem = ({ 
+  text, 
+  img, 
+  price, 
+  weight, 
+  description, 
+  onAddToCart, 
+  isFavorite, 
+  onToggleFavorite 
+}: CardItemProps) => {
   return (
     <View style={styles.card}>
       <Image source={{ uri: img }} style={styles.image} />
@@ -18,9 +30,15 @@ export const CardItem = ({ text, img, price, weight, description, onAddToCart }:
       <View style={styles.info}>
         <View style={styles.row}>
           <Text style={styles.name} numberOfLines={1}>{text}</Text>
-          <TouchableOpacity style={styles.heartBtn}>
-            <Text style={styles.heartText}>♡</Text>
+          
+          <TouchableOpacity style={styles.heartBtn} onPress={onToggleFavorite}>
+               <Ionicons 
+                  name={isFavorite ? "heart" : "heart-outline"} 
+                  size={21} 
+                  color={isFavorite ? '#E50914' : '#333'} 
+              />
           </TouchableOpacity>
+          
         </View>
 
         <Text style={styles.description} numberOfLines={2}>
